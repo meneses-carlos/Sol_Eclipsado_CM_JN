@@ -1,10 +1,11 @@
 package com.example.sol_eclipsado_cm_jn.model;
+
 /**
- * Defines the basic contract for the Solar Eclipse game model.
+ * Defines the base contract for the Solar Eclipse game model.
  *
  * @author Jorge Navia
  * @author Carlos Meneses
- * @version 1.0
+ * @version 1.1
  * @since 1.0
  */
 public interface ISolarEclipseGame
@@ -15,18 +16,21 @@ public interface ISolarEclipseGame
      * @param secretWord word to be guessed by the player
      */
     void setSecretWord(String secretWord);
+
     /**
      * Returns the current secret word.
      *
      * @return current secret word
      */
     String getSecretWord();
+
     /**
-     * Returns the current secret word.
+     * Returns the current number of errors.
      *
-     * @return current secret word
+     * @return current error count
      */
     int getErrors();
+
     /**
      * Returns the number of used help actions.
      *

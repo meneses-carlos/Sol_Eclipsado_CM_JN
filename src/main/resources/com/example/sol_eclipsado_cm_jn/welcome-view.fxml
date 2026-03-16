@@ -1,14 +1,41 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.VBox?>
 
 <VBox xmlns="http://javafx.com/javafx/17"
       xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.example.sol_eclipsado_cm_jn.controller.WelcomeController"
       alignment="CENTER"
-      spacing="16">
+      spacing="16"
+      prefWidth="420"
+      prefHeight="260">
+    <padding>
+        <Insets top="20" right="20" bottom="20" left="20"/>
+    </padding>
+
     <children>
-        <Label text="Welcome - Sol Eclipsado" />
+        <Label text="Sol Eclipsado"
+               style="-fx-font-size: 24px; -fx-font-weight: bold;" />
+
+        <Label text="Ingresa la palabra secreta para iniciar el juego."
+               wrapText="true"
+               style="-fx-font-size: 14px;" />
+
+        <TextField fx:id="secretWordTextField"
+                   promptText="Escribe la palabra secreta"
+                   maxWidth="250" />
+
+        <Button text="Comenzar"
+                onAction="#onHandleStartButton"
+                maxWidth="140" />
+
+        <Label fx:id="feedbackLabel"
+               text=""
+               wrapText="true"
+               style="-fx-font-size: 13px;" />
     </children>
 </VBox>
