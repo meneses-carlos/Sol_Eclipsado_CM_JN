@@ -1,14 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.VBox?>
 
 <VBox xmlns="http://javafx.com/javafx/17"
       xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="com.example.sol_eclipsado_cm_jn.controller.WelcomeController"
+      fx:controller="com.example.sol_eclipsado_cm_jn.controller.GameController"
       alignment="CENTER"
-      spacing="16">
+      spacing="16"
+      prefWidth="500"
+      prefHeight="300">
+    <padding>
+        <Insets top="20" right="20" bottom="20" left="20"/>
+    </padding>
+
     <children>
-        <Label text="Welcome - Sol Eclipsado" />
+        <Label text="Zona de juego - Sol Eclipsado"
+               style="-fx-font-size: 24px; -fx-font-weight: bold;" />
+
+        <Label fx:id="gameStatusLabel"
+               text="Esperando información del juego..."
+               wrapText="true"
+               style="-fx-font-size: 14px;" />
+
+        <Label fx:id="wordLengthLabel"
+               text=""
+               wrapText="true"
+               style="-fx-font-size: 14px;" />
     </children>
 </VBox>
