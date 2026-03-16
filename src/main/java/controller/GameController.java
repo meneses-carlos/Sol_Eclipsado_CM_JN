@@ -16,12 +16,12 @@ import java.util.Locale;
 
 /**
  * Controller for the main game screen.
- * It receives the game model, creates the dynamic input fields
- * and evaluates the entered letters against the secret word.
+ * It receives the game model, creates the dynamic input fields,
+ * evaluates the entered letters and manages the player's attempts.
  *
  * @author Jorge Navia
  * @author Carlos Meneses
- * @version 1.6
+ * @version 1.7
  * @since 1.0
  */
 public class GameController
@@ -69,6 +69,12 @@ public class GameController
     private SolarEclipseGame game;
 
     /**
+     * Indicates whether the current completed word attempt
+     * has already been counted as an error.
+     */
+    private boolean currentAttemptCounted;
+
+    /**
      * Label that displays the general state of the game screen.
      */
     @FXML
@@ -79,6 +85,12 @@ public class GameController
      */
     @FXML
     private Label wordLengthLabel;
+
+    /**
+     * Label that displays the remaining attempts.
+     */
+    @FXML
+    private Label remainingAttemptsLabel;
 
     /**
      * Grid container used to place the generated letter fields.
@@ -97,6 +109,7 @@ public class GameController
     public GameController()
     {
         letterFields = new ArrayList<>();
+        currentAttemptCounted = false;
     }
 
     /**
@@ -107,6 +120,7 @@ public class GameController
     {
         gameStatusLabel.setText("Esperando información del juego...");
         wordLengthLabel.setText("");
+        remainingAttemptsLabel.setText("");
     }
 
     /**
@@ -117,6 +131,7 @@ public class GameController
     public void setGame(SolarEclipseGame game)
     {
         this.game = game;
+        this.currentAttemptCounted = false;
         updateView();
     }
 
@@ -129,12 +144,15 @@ public class GameController
         {
             gameStatusLabel.setText("No se pudo cargar la información del juego.");
             wordLengthLabel.setText("");
+            remainingAttemptsLabel.setText("");
             clearLetterFields();
             return;
         }
 
+        gameStatusLabel.setStyle("-fx-text-fill: black;");
         gameStatusLabel.setText("Escribe una letra válida en cada casilla.");
         wordLengthLabel.setText("La palabra tiene " + game.getSecretWord().length() + " letras.");
+        updateRemainingAttemptsLabel();
         createLetterFields(game.getSecretWord().length());
         focusFirstField();
     }
@@ -187,6 +205,12 @@ public class GameController
      */
     private void onHandleLetterFieldKeyTyped(KeyEvent event, int fieldIndex)
     {
+        if (game != null && game.isGameLost())
+        {
+            event.consume();
+            return;
+        }
+
         String typedCharacter = event.getCharacter();
 
         if (typedCharacter == null || typedCharacter.isEmpty())
@@ -203,6 +227,7 @@ public class GameController
 
         if (!isValidSpanishLetter(typedCharacter))
         {
+            gameStatusLabel.setStyle("-fx-text-fill: #c62828;");
             gameStatusLabel.setText("Solo se permiten letras del alfabeto español.");
             event.consume();
             return;
@@ -210,6 +235,8 @@ public class GameController
 
         TextField currentField = letterFields.get(fieldIndex);
         currentField.setText(typedCharacter.toUpperCase(SPANISH_LOCALE));
+        currentAttemptCounted = false;
+
         evaluateCurrentField(fieldIndex);
         updateProgressStatus();
         moveToNextField(fieldIndex);
@@ -226,10 +253,18 @@ public class GameController
      */
     private void onHandleLetterFieldKeyPressed(KeyEvent event, int fieldIndex)
     {
+        if (game != null && game.isGameLost())
+        {
+            event.consume();
+            return;
+        }
+
         TextField currentField = letterFields.get(fieldIndex);
 
         if (event.getCode() == KeyCode.BACK_SPACE)
         {
+            currentAttemptCounted = false;
+
             if (!currentField.getText().isEmpty())
             {
                 currentField.clear();
@@ -289,29 +324,66 @@ public class GameController
     }
 
     /**
-     * Updates the progress message based on the current entered letters.
+     * Updates the progress message and handles completed attempts.
      */
     private void updateProgressStatus()
     {
         List<String> enteredLetters = getEnteredLetters();
         int correctLetters = game.countCorrectLetters(enteredLetters);
 
+        updateRemainingAttemptsLabel();
+
         if (game.isSecretWordCompleted(enteredLetters))
         {
             gameStatusLabel.setStyle("-fx-text-fill: #2e7d32;");
             gameStatusLabel.setText("¡Correcto! Has completado la palabra secreta.");
+            disableAllLetterFields();
             return;
         }
 
         if (areAllFieldsFilled())
         {
+            if (!currentAttemptCounted)
+            {
+                game.registerError();
+                currentAttemptCounted = true;
+                updateRemainingAttemptsLabel();
+            }
+
+            if (game.isGameLost())
+            {
+                gameStatusLabel.setStyle("-fx-text-fill: #c62828;");
+                gameStatusLabel.setText("Has perdido. Se agotaron los intentos.");
+                disableAllLetterFields();
+                return;
+            }
+
             gameStatusLabel.setStyle("-fx-text-fill: #c62828;");
-            gameStatusLabel.setText("Hay letras incorrectas. Corrige las casillas en rojo.");
+            gameStatusLabel.setText("La palabra aún es incorrecta. Corrige las casillas en rojo.");
             return;
         }
 
         gameStatusLabel.setStyle("-fx-text-fill: black;");
         gameStatusLabel.setText("Letras correctas en posición: " + correctLetters + " de " + letterFields.size() + ".");
+    }
+
+    /**
+     * Updates the label that shows the remaining attempts.
+     */
+    private void updateRemainingAttemptsLabel()
+    {
+        remainingAttemptsLabel.setText("Intentos restantes: " + game.getRemainingAttempts());
+    }
+
+    /**
+     * Disables all dynamic text fields.
+     */
+    private void disableAllLetterFields()
+    {
+        for (TextField letterField : letterFields)
+        {
+            letterField.setDisable(true);
+        }
     }
 
     /**

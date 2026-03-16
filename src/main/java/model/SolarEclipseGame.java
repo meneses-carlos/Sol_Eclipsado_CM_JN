@@ -1,6 +1,5 @@
 package com.example.sol_eclipsado_cm_jn.model;
 
-import java.text.Normalizer;
 import java.util.List;
 import java.util.Locale;
 
@@ -9,14 +8,19 @@ import java.util.Locale;
  *
  * @author Jorge Navia
  * @author Carlos Meneses
- * @version 1.6
+ * @version 1.7
  * @since 1.0
  * @see ISolarEclipseGame
  */
 public class SolarEclipseGame implements ISolarEclipseGame
 {
     /**
-     * Locale used to normalize and compare letters consistently.
+     * Maximum number of allowed errors in the game.
+     */
+    private static final int MAX_ERRORS = 5;
+
+    /**
+     * Locale used to compare letters consistently.
      */
     private static final Locale SPANISH_LOCALE = new Locale("es", "ES");
 
@@ -112,7 +116,8 @@ public class SolarEclipseGame implements ISolarEclipseGame
 
         String expectedLetter = String.valueOf(secretWord.charAt(index));
 
-        return normalizeLetter(expectedLetter).equals(normalizeLetter(enteredLetter));
+        return normalizeComparableLetter(expectedLetter)
+                .equals(normalizeComparableLetter(enteredLetter));
     }
 
     /**
@@ -168,15 +173,59 @@ public class SolarEclipseGame implements ISolarEclipseGame
     }
 
     /**
-     * Normalizes a letter by removing accents and converting it to uppercase.
+     * Increases the number of committed errors by one.
+     */
+    @Override
+    public void registerError()
+    {
+        if (errors < MAX_ERRORS)
+        {
+            errors++;
+        }
+    }
+
+    /**
+     * Returns the number of attempts remaining in the game.
+     *
+     * @return remaining attempts
+     */
+    @Override
+    public int getRemainingAttempts()
+    {
+        return MAX_ERRORS - errors;
+    }
+
+    /**
+     * Checks whether the maximum number of errors has been reached.
+     *
+     * @return true if the game is lost, false otherwise
+     */
+    @Override
+    public boolean isGameLost()
+    {
+        return errors >= MAX_ERRORS;
+    }
+
+    /**
+     * Normalizes a comparable letter while preserving the distinction
+     * between letters such as n/ñ and u/ü.
+     * Only accented vowels are treated as equivalent to their non-accented forms.
      *
      * @param letter letter to normalize
-     * @return normalized letter
+     * @return normalized comparable letter
      */
-    private String normalizeLetter(String letter)
+    private String normalizeComparableLetter(String letter)
     {
-        String normalizedLetter = Normalizer.normalize(letter, Normalizer.Form.NFD);
-        normalizedLetter = normalizedLetter.replaceAll("\\p{M}", "");
-        return normalizedLetter.toUpperCase(SPANISH_LOCALE);
+        String upperLetter = letter.toUpperCase(SPANISH_LOCALE);
+
+        return switch (upperLetter)
+        {
+            case "Á" -> "A";
+            case "É" -> "E";
+            case "Í" -> "I";
+            case "Ó" -> "O";
+            case "Ú" -> "U";
+            default -> upperLetter;
+        };
     }
 }

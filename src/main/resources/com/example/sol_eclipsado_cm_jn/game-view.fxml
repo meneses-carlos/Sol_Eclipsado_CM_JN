@@ -11,7 +11,7 @@
       alignment="CENTER"
       spacing="18"
       prefWidth="560"
-      prefHeight="340">
+      prefHeight="360">
     <padding>
         <Insets top="20" right="20" bottom="20" left="20"/>
     </padding>
@@ -29,6 +29,11 @@
                text=""
                wrapText="true"
                style="-fx-font-size: 14px;" />
+
+        <Label fx:id="remainingAttemptsLabel"
+               text=""
+               wrapText="true"
+               style="-fx-font-size: 14px; -fx-font-weight: bold;" />
 
         <GridPane fx:id="lettersGridPane"
                   hgap="8"
