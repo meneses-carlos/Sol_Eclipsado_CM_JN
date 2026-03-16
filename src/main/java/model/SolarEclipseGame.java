@@ -5,7 +5,7 @@ package com.example.sol_eclipsado_cm_jn.model;
  *
  * @author Jorge Navia
  * @author Carlos Meneses
- * @version 1.1
+ * @version 1.2
  * @since 1.0
  * @see ISolarEclipseGame
  */
@@ -44,7 +44,7 @@ public class SolarEclipseGame implements ISolarEclipseGame
     @Override
     public void setSecretWord(String secretWord)
     {
-        this.secretWord = secretWord;
+        this.secretWord = secretWord.trim();
     }
 
     /**
