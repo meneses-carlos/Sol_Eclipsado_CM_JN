@@ -13,7 +13,7 @@ import java.io.IOException;
  *
  * @author Jorge Navia
  * @author Carlos Meneses
- * @version 1.3
+ * @version 1.4
  * @since 1.0
  */
 public class GameStage extends Stage
