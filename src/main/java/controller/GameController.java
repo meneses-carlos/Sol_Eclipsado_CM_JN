@@ -17,11 +17,11 @@ import java.util.Locale;
 /**
  * Controller for the main game screen.
  * It receives the game model, creates the dynamic input fields,
- * evaluates the entered letters and manages the player's attempts.
+ * evaluates each entered letter and counts errors per incorrect letter.
  *
  * @author Jorge Navia
  * @author Carlos Meneses
- * @version 1.7
+ * @version 1.7.1
  * @since 1.0
  */
 public class GameController
@@ -69,12 +69,6 @@ public class GameController
     private SolarEclipseGame game;
 
     /**
-     * Indicates whether the current completed word attempt
-     * has already been counted as an error.
-     */
-    private boolean currentAttemptCounted;
-
-    /**
      * Label that displays the general state of the game screen.
      */
     @FXML
@@ -109,7 +103,6 @@ public class GameController
     public GameController()
     {
         letterFields = new ArrayList<>();
-        currentAttemptCounted = false;
     }
 
     /**
@@ -131,7 +124,6 @@ public class GameController
     public void setGame(SolarEclipseGame game)
     {
         this.game = game;
-        this.currentAttemptCounted = false;
         updateView();
     }
 
@@ -198,7 +190,8 @@ public class GameController
 
     /**
      * Handles the key typed event for a dynamic letter field.
-     * It only allows one valid Spanish letter in each field.
+     * It only allows one valid Spanish letter in each field and
+     * counts an error immediately if the entered letter is incorrect.
      *
      * @param event key typed event
      * @param fieldIndex index of the field that received the event
@@ -234,12 +227,41 @@ public class GameController
         }
 
         TextField currentField = letterFields.get(fieldIndex);
-        currentField.setText(typedCharacter.toUpperCase(SPANISH_LOCALE));
-        currentAttemptCounted = false;
+        String enteredLetter = typedCharacter.toUpperCase(SPANISH_LOCALE);
 
+        currentField.setText(enteredLetter);
+
+        boolean isCorrect = game.isLetterCorrectAt(fieldIndex, enteredLetter);
         evaluateCurrentField(fieldIndex);
-        updateProgressStatus();
-        moveToNextField(fieldIndex);
+        updateRemainingAttemptsLabel();
+
+        if (isCorrect)
+        {
+            updateProgressStatus();
+
+            if (!game.isGameLost())
+            {
+                moveToNextField(fieldIndex);
+            }
+        }
+        else
+        {
+            game.registerError();
+            updateRemainingAttemptsLabel();
+
+            if (game.isGameLost())
+            {
+                gameStatusLabel.setStyle("-fx-text-fill: #c62828;");
+                gameStatusLabel.setText("Has perdido. Se agotaron los intentos.");
+                disableAllLetterFields();
+                event.consume();
+                return;
+            }
+
+            gameStatusLabel.setStyle("-fx-text-fill: #c62828;");
+            gameStatusLabel.setText("Letra incorrecta. Intentos restantes: " + game.getRemainingAttempts() + ".");
+            currentField.requestFocus();
+        }
 
         event.consume();
     }
@@ -263,8 +285,6 @@ public class GameController
 
         if (event.getCode() == KeyCode.BACK_SPACE)
         {
-            currentAttemptCounted = false;
-
             if (!currentField.getText().isEmpty())
             {
                 currentField.clear();
@@ -324,7 +344,7 @@ public class GameController
     }
 
     /**
-     * Updates the progress message and handles completed attempts.
+     * Updates the progress message without counting additional errors.
      */
     private void updateProgressStatus()
     {
@@ -332,6 +352,14 @@ public class GameController
         int correctLetters = game.countCorrectLetters(enteredLetters);
 
         updateRemainingAttemptsLabel();
+
+        if (game.isGameLost())
+        {
+            gameStatusLabel.setStyle("-fx-text-fill: #c62828;");
+            gameStatusLabel.setText("Has perdido. Se agotaron los intentos.");
+            disableAllLetterFields();
+            return;
+        }
 
         if (game.isSecretWordCompleted(enteredLetters))
         {
@@ -343,23 +371,8 @@ public class GameController
 
         if (areAllFieldsFilled())
         {
-            if (!currentAttemptCounted)
-            {
-                game.registerError();
-                currentAttemptCounted = true;
-                updateRemainingAttemptsLabel();
-            }
-
-            if (game.isGameLost())
-            {
-                gameStatusLabel.setStyle("-fx-text-fill: #c62828;");
-                gameStatusLabel.setText("Has perdido. Se agotaron los intentos.");
-                disableAllLetterFields();
-                return;
-            }
-
-            gameStatusLabel.setStyle("-fx-text-fill: #c62828;");
-            gameStatusLabel.setText("La palabra aún es incorrecta. Corrige las casillas en rojo.");
+            gameStatusLabel.setStyle("-fx-text-fill: black;");
+            gameStatusLabel.setText("Hay letras incorrectas. Corrige las casillas en rojo.");
             return;
         }
 
