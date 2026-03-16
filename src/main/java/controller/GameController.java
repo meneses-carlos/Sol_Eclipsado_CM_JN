@@ -16,12 +16,12 @@ import java.util.Locale;
 
 /**
  * Controller for the main game screen.
- * It receives the game model and dynamically creates the input fields
- * required to represent the secret word.
+ * It receives the game model, creates the dynamic input fields
+ * and evaluates the entered letters against the secret word.
  *
  * @author Jorge Navia
  * @author Carlos Meneses
- * @version 1.5
+ * @version 1.6
  * @since 1.0
  */
 public class GameController
@@ -30,6 +30,38 @@ public class GameController
      * Locale used to transform letters to uppercase consistently.
      */
     private static final Locale SPANISH_LOCALE = new Locale("es", "ES");
+
+    /**
+     * Style used for neutral fields.
+     */
+    private static final String NEUTRAL_FIELD_STYLE =
+            "-fx-font-size: 16px;" +
+                    "-fx-font-weight: bold;" +
+                    "-fx-border-color: black;" +
+                    "-fx-border-radius: 4;" +
+                    "-fx-background-radius: 4;";
+
+    /**
+     * Style used for correct fields.
+     */
+    private static final String CORRECT_FIELD_STYLE =
+            "-fx-font-size: 16px;" +
+                    "-fx-font-weight: bold;" +
+                    "-fx-border-color: #2e7d32;" +
+                    "-fx-background-color: #c8e6c9;" +
+                    "-fx-border-radius: 4;" +
+                    "-fx-background-radius: 4;";
+
+    /**
+     * Style used for incorrect fields.
+     */
+    private static final String INCORRECT_FIELD_STYLE =
+            "-fx-font-size: 16px;" +
+                    "-fx-font-weight: bold;" +
+                    "-fx-border-color: #c62828;" +
+                    "-fx-background-color: #ffcdd2;" +
+                    "-fx-border-radius: 4;" +
+                    "-fx-background-radius: 4;";
 
     /**
      * Current game model used by the game screen.
@@ -138,13 +170,7 @@ public class GameController
         textField.setMaxWidth(42);
         textField.setAlignment(Pos.CENTER);
         textField.setPromptText("");
-        textField.setStyle(
-                "-fx-font-size: 16px;" +
-                        "-fx-font-weight: bold;" +
-                        "-fx-border-color: black;" +
-                        "-fx-border-radius: 4;" +
-                        "-fx-background-radius: 4;"
-        );
+        textField.setStyle(NEUTRAL_FIELD_STYLE);
 
         textField.setOnKeyTyped(event -> onHandleLetterFieldKeyTyped(event, fieldIndex));
         textField.setOnKeyPressed(event -> onHandleLetterFieldKeyPressed(event, fieldIndex));
@@ -184,9 +210,10 @@ public class GameController
 
         TextField currentField = letterFields.get(fieldIndex);
         currentField.setText(typedCharacter.toUpperCase(SPANISH_LOCALE));
+        evaluateCurrentField(fieldIndex);
+        updateProgressStatus();
         moveToNextField(fieldIndex);
 
-        gameStatusLabel.setText("Letra registrada correctamente.");
         event.consume();
     }
 
@@ -206,15 +233,17 @@ public class GameController
             if (!currentField.getText().isEmpty())
             {
                 currentField.clear();
+                applyNeutralStyle(currentField);
             }
             else if (fieldIndex > 0)
             {
                 TextField previousField = letterFields.get(fieldIndex - 1);
                 previousField.clear();
+                applyNeutralStyle(previousField);
                 previousField.requestFocus();
             }
 
-            gameStatusLabel.setText("Casilla actualizada.");
+            updateProgressStatus();
             event.consume();
             return;
         }
@@ -231,6 +260,123 @@ public class GameController
             letterFields.get(fieldIndex + 1).requestFocus();
             event.consume();
         }
+    }
+
+    /**
+     * Evaluates the current field against the secret word and updates its visual style.
+     *
+     * @param fieldIndex position of the field to evaluate
+     */
+    private void evaluateCurrentField(int fieldIndex)
+    {
+        TextField currentField = letterFields.get(fieldIndex);
+        String enteredLetter = currentField.getText();
+
+        if (enteredLetter.isBlank())
+        {
+            applyNeutralStyle(currentField);
+            return;
+        }
+
+        if (game.isLetterCorrectAt(fieldIndex, enteredLetter))
+        {
+            applyCorrectStyle(currentField);
+        }
+        else
+        {
+            applyIncorrectStyle(currentField);
+        }
+    }
+
+    /**
+     * Updates the progress message based on the current entered letters.
+     */
+    private void updateProgressStatus()
+    {
+        List<String> enteredLetters = getEnteredLetters();
+        int correctLetters = game.countCorrectLetters(enteredLetters);
+
+        if (game.isSecretWordCompleted(enteredLetters))
+        {
+            gameStatusLabel.setStyle("-fx-text-fill: #2e7d32;");
+            gameStatusLabel.setText("¡Correcto! Has completado la palabra secreta.");
+            return;
+        }
+
+        if (areAllFieldsFilled())
+        {
+            gameStatusLabel.setStyle("-fx-text-fill: #c62828;");
+            gameStatusLabel.setText("Hay letras incorrectas. Corrige las casillas en rojo.");
+            return;
+        }
+
+        gameStatusLabel.setStyle("-fx-text-fill: black;");
+        gameStatusLabel.setText("Letras correctas en posición: " + correctLetters + " de " + letterFields.size() + ".");
+    }
+
+    /**
+     * Returns the letters currently entered by the user.
+     *
+     * @return list of entered letters
+     */
+    private List<String> getEnteredLetters()
+    {
+        List<String> enteredLetters = new ArrayList<>();
+
+        for (TextField letterField : letterFields)
+        {
+            enteredLetters.add(letterField.getText());
+        }
+
+        return enteredLetters;
+    }
+
+    /**
+     * Checks whether all generated fields currently contain a letter.
+     *
+     * @return true if all fields are filled, false otherwise
+     */
+    private boolean areAllFieldsFilled()
+    {
+        for (TextField letterField : letterFields)
+        {
+            if (letterField.getText().isBlank())
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Applies the neutral style to a field.
+     *
+     * @param textField field to style
+     */
+    private void applyNeutralStyle(TextField textField)
+    {
+        textField.setStyle(NEUTRAL_FIELD_STYLE);
+    }
+
+    /**
+     * Applies the correct style to a field.
+     *
+     * @param textField field to style
+     */
+    private void applyCorrectStyle(TextField textField)
+    {
+        textField.setStyle(CORRECT_FIELD_STYLE);
+    }
+
+    /**
+     * Applies the incorrect style to a field.
+     *
+     * @param textField field to style
+     */
+    private void applyIncorrectStyle(TextField textField)
+    {
+        textField.setStyle(INCORRECT_FIELD_STYLE);
     }
 
     /**

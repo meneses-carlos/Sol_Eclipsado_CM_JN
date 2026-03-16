@@ -1,16 +1,25 @@
 package com.example.sol_eclipsado_cm_jn.model;
 
+import java.text.Normalizer;
+import java.util.List;
+import java.util.Locale;
+
 /**
  * Represents the main state of the Solar Eclipse game.
  *
  * @author Jorge Navia
  * @author Carlos Meneses
- * @version 1.2
+ * @version 1.6
  * @since 1.0
  * @see ISolarEclipseGame
  */
 public class SolarEclipseGame implements ISolarEclipseGame
 {
+    /**
+     * Locale used to normalize and compare letters consistently.
+     */
+    private static final Locale SPANISH_LOCALE = new Locale("es", "ES");
+
     /**
      * Secret word to be guessed during the game.
      */
@@ -78,5 +87,96 @@ public class SolarEclipseGame implements ISolarEclipseGame
     public int getUsedHelps()
     {
         return usedHelps;
+    }
+
+    /**
+     * Checks whether the entered letter matches the secret word
+     * at the specified position.
+     *
+     * @param index position to validate
+     * @param enteredLetter entered letter
+     * @return true if the entered letter is correct for the position, false otherwise
+     */
+    @Override
+    public boolean isLetterCorrectAt(int index, String enteredLetter)
+    {
+        if (enteredLetter == null || enteredLetter.isBlank())
+        {
+            return false;
+        }
+
+        if (index < 0 || index >= secretWord.length())
+        {
+            return false;
+        }
+
+        String expectedLetter = String.valueOf(secretWord.charAt(index));
+
+        return normalizeLetter(expectedLetter).equals(normalizeLetter(enteredLetter));
+    }
+
+    /**
+     * Counts how many entered letters are correct in their respective positions.
+     *
+     * @param enteredLetters letters currently entered by the user
+     * @return number of correct letters
+     */
+    @Override
+    public int countCorrectLetters(List<String> enteredLetters)
+    {
+        if (enteredLetters == null)
+        {
+            return 0;
+        }
+
+        int correctCount = 0;
+
+        for (int index = 0; index < enteredLetters.size() && index < secretWord.length(); index++)
+        {
+            if (isLetterCorrectAt(index, enteredLetters.get(index)))
+            {
+                correctCount++;
+            }
+        }
+
+        return correctCount;
+    }
+
+    /**
+     * Checks whether the whole secret word has been completed correctly.
+     *
+     * @param enteredLetters letters currently entered by the user
+     * @return true if the whole word matches, false otherwise
+     */
+    @Override
+    public boolean isSecretWordCompleted(List<String> enteredLetters)
+    {
+        if (enteredLetters == null || enteredLetters.size() != secretWord.length())
+        {
+            return false;
+        }
+
+        for (int index = 0; index < enteredLetters.size(); index++)
+        {
+            if (!isLetterCorrectAt(index, enteredLetters.get(index)))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Normalizes a letter by removing accents and converting it to uppercase.
+     *
+     * @param letter letter to normalize
+     * @return normalized letter
+     */
+    private String normalizeLetter(String letter)
+    {
+        String normalizedLetter = Normalizer.normalize(letter, Normalizer.Form.NFD);
+        normalizedLetter = normalizedLetter.replaceAll("\\p{M}", "");
+        return normalizedLetter.toUpperCase(SPANISH_LOCALE);
     }
 }
