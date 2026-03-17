@@ -1,13 +1,14 @@
 package com.example.sol_eclipsado_cm_jn.model;
 
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Defines the base contract for the Solar Eclipse game model.
  *
  * @author Jorge Navia
  * @author Carlos Meneses
- * @version 1.7
+ * @version 1.8
  * @since 1.0
  */
 public interface ISolarEclipseGame
@@ -84,4 +85,11 @@ public interface ISolarEclipseGame
      * @return true if the game is lost, false otherwise
      */
     boolean isGameLost();
+
+    /**
+     * Returns the eclipse percentage based on the current number of errors.
+     *
+     * @return eclipse percentage
+     */
+    int getEclipsePercentage();
 }

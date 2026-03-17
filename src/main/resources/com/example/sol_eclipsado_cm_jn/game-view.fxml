@@ -3,7 +3,9 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Circle?>
 
 <VBox xmlns="http://javafx.com/javafx/17"
       xmlns:fx="http://javafx.com/fxml/1"
@@ -11,7 +13,7 @@
       alignment="CENTER"
       spacing="18"
       prefWidth="560"
-      prefHeight="360">
+      prefHeight="460">
     <padding>
         <Insets top="20" right="20" bottom="20" left="20"/>
     </padding>
@@ -33,6 +35,25 @@
         <Label fx:id="remainingAttemptsLabel"
                text=""
                wrapText="true"
+               style="-fx-font-size: 14px; -fx-font-weight: bold;" />
+
+        <StackPane prefWidth="160" prefHeight="160">
+            <children>
+                <Circle radius="50"
+                        fill="#FDB813"
+                        stroke="#F57F17"
+                        strokeWidth="4" />
+
+                <Circle fx:id="shadowCircle"
+                        radius="50"
+                        fill="#111111"
+                        opacity="0.88"
+                        translateX="110" />
+            </children>
+        </StackPane>
+
+        <Label fx:id="eclipsePercentageLabel"
+               text="Eclipse del sol: 0%"
                style="-fx-font-size: 14px; -fx-font-weight: bold;" />
 
         <GridPane fx:id="lettersGridPane"

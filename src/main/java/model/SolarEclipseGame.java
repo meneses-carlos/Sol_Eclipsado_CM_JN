@@ -8,7 +8,7 @@ import java.util.Locale;
  *
  * @author Jorge Navia
  * @author Carlos Meneses
- * @version 1.7
+ * @version 1.8
  * @since 1.0
  * @see ISolarEclipseGame
  */
@@ -18,6 +18,11 @@ public class SolarEclipseGame implements ISolarEclipseGame
      * Maximum number of allowed errors in the game.
      */
     private static final int MAX_ERRORS = 5;
+
+    /**
+     * Eclipse percentage added for each committed error.
+     */
+    private static final int ECLIPSE_STEP_PERCENTAGE = 20;
 
     /**
      * Locale used to compare letters consistently.
@@ -204,6 +209,17 @@ public class SolarEclipseGame implements ISolarEclipseGame
     public boolean isGameLost()
     {
         return errors >= MAX_ERRORS;
+    }
+
+    /**
+     * Returns the eclipse percentage based on the current number of errors.
+     *
+     * @return eclipse percentage
+     */
+    @Override
+    public int getEclipsePercentage()
+    {
+        return errors * ECLIPSE_STEP_PERCENTAGE;
     }
 
     /**

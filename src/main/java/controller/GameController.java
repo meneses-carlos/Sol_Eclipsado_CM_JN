@@ -8,6 +8,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
+import javafx.scene.shape.Circle;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -17,15 +18,22 @@ import java.util.Locale;
 /**
  * Controller for the main game screen.
  * It receives the game model, creates the dynamic input fields,
- * evaluates each entered letter and counts errors per incorrect letter.
+ * evaluates each entered letter, counts errors per incorrect letter
+ * and updates the eclipse visualization.
  *
  * @author Jorge Navia
  * @author Carlos Meneses
- * @version 1.7.1
+ * @version 1.8
  * @since 1.0
  */
 public class GameController
 {
+    /**
+     * Maximum horizontal offset used to keep the eclipse shadow outside the sun
+     * when there are no errors.
+     */
+    private static final double MAX_SHADOW_OFFSET = 110.0;
+
     /**
      * Locale used to transform letters to uppercase consistently.
      */
@@ -87,6 +95,18 @@ public class GameController
     private Label remainingAttemptsLabel;
 
     /**
+     * Label that displays the eclipse percentage.
+     */
+    @FXML
+    private Label eclipsePercentageLabel;
+
+    /**
+     * Circle used as the moving eclipse shadow.
+     */
+    @FXML
+    private Circle shadowCircle;
+
+    /**
      * Grid container used to place the generated letter fields.
      */
     @FXML
@@ -114,6 +134,7 @@ public class GameController
         gameStatusLabel.setText("Esperando información del juego...");
         wordLengthLabel.setText("");
         remainingAttemptsLabel.setText("");
+        eclipsePercentageLabel.setText("Eclipse del sol: 0%");
     }
 
     /**
@@ -137,6 +158,7 @@ public class GameController
             gameStatusLabel.setText("No se pudo cargar la información del juego.");
             wordLengthLabel.setText("");
             remainingAttemptsLabel.setText("");
+            eclipsePercentageLabel.setText("Eclipse del sol: 0%");
             clearLetterFields();
             return;
         }
@@ -145,6 +167,7 @@ public class GameController
         gameStatusLabel.setText("Escribe una letra válida en cada casilla.");
         wordLengthLabel.setText("La palabra tiene " + game.getSecretWord().length() + " letras.");
         updateRemainingAttemptsLabel();
+        updateEclipseVisualization();
         createLetterFields(game.getSecretWord().length());
         focusFirstField();
     }
@@ -233,7 +256,6 @@ public class GameController
 
         boolean isCorrect = game.isLetterCorrectAt(fieldIndex, enteredLetter);
         evaluateCurrentField(fieldIndex);
-        updateRemainingAttemptsLabel();
 
         if (isCorrect)
         {
@@ -248,6 +270,7 @@ public class GameController
         {
             game.registerError();
             updateRemainingAttemptsLabel();
+            updateEclipseVisualization();
 
             if (game.isGameLost())
             {
@@ -352,6 +375,7 @@ public class GameController
         int correctLetters = game.countCorrectLetters(enteredLetters);
 
         updateRemainingAttemptsLabel();
+        updateEclipseVisualization();
 
         if (game.isGameLost())
         {
@@ -386,6 +410,19 @@ public class GameController
     private void updateRemainingAttemptsLabel()
     {
         remainingAttemptsLabel.setText("Intentos restantes: " + game.getRemainingAttempts());
+    }
+
+    /**
+     * Updates the eclipse visual representation and the eclipse percentage label.
+     */
+    private void updateEclipseVisualization()
+    {
+        int eclipsePercentage = game.getEclipsePercentage();
+        double eclipseFraction = eclipsePercentage / 100.0;
+        double shadowOffset = MAX_SHADOW_OFFSET * (1.0 - eclipseFraction);
+
+        shadowCircle.setTranslateX(shadowOffset);
+        eclipsePercentageLabel.setText("Eclipse del sol: " + eclipsePercentage + "%");
     }
 
     /**
