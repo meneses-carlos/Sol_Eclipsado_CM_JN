@@ -2,6 +2,7 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
@@ -44,11 +45,9 @@
                         stroke="#F57F17"
                         strokeWidth="4" />
 
-                <Circle fx:id="shadowCircle"
-                        radius="50"
-                        fill="#111111"
-                        opacity="0.88"
-                        translateX="110" />
+                <ImageView fx:id="eclipseImageView" fitHeight="200.0" fitWidth="200.0" preserveRatio="true"/>
+
+
             </children>
         </StackPane>
 

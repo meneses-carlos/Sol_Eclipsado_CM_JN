@@ -5,10 +5,11 @@ import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
-import javafx.scene.shape.Circle;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -28,12 +29,6 @@ import java.util.Locale;
  */
 public class GameController
 {
-    /**
-     * Maximum horizontal offset used to keep the eclipse shadow outside the sun
-     * when there are no errors.
-     */
-    private static final double MAX_SHADOW_OFFSET = 110.0;
-
     /**
      * Locale used to transform letters to uppercase consistently.
      */
@@ -101,10 +96,10 @@ public class GameController
     private Label eclipsePercentageLabel;
 
     /**
-     * Circle used as the moving eclipse shadow.
+     * Image that displays the current eclipse phase.
      */
     @FXML
-    private Circle shadowCircle;
+    private ImageView eclipseImageView;
 
     /**
      * Grid container used to place the generated letter fields.
@@ -131,10 +126,11 @@ public class GameController
     @FXML
     public void initialize()
     {
-        gameStatusLabel.setText("Esperando información del juego...");
+        gameStatusLabel.setText("Esperando informacion del juego...");
         wordLengthLabel.setText("");
         remainingAttemptsLabel.setText("");
         eclipsePercentageLabel.setText("Eclipse del sol: 0%");
+        updateEclipseImage(0);
     }
 
     /**
@@ -155,16 +151,17 @@ public class GameController
     {
         if (game == null)
         {
-            gameStatusLabel.setText("No se pudo cargar la información del juego.");
+            gameStatusLabel.setText("No se pudo cargar la informacion del juego.");
             wordLengthLabel.setText("");
             remainingAttemptsLabel.setText("");
             eclipsePercentageLabel.setText("Eclipse del sol: 0%");
+            updateEclipseImage(0);
             clearLetterFields();
             return;
         }
 
         gameStatusLabel.setStyle("-fx-text-fill: black;");
-        gameStatusLabel.setText("Escribe una letra válida en cada casilla.");
+        gameStatusLabel.setText("Escribe una letra valida en cada casilla.");
         wordLengthLabel.setText("La palabra tiene " + game.getSecretWord().length() + " letras.");
         updateRemainingAttemptsLabel();
         updateEclipseVisualization();
@@ -244,7 +241,7 @@ public class GameController
         if (!isValidSpanishLetter(typedCharacter))
         {
             gameStatusLabel.setStyle("-fx-text-fill: #c62828;");
-            gameStatusLabel.setText("Solo se permiten letras del alfabeto español.");
+            gameStatusLabel.setText("Solo se permiten letras del alfabeto espanol.");
             event.consume();
             return;
         }
@@ -388,7 +385,7 @@ public class GameController
         if (game.isSecretWordCompleted(enteredLetters))
         {
             gameStatusLabel.setStyle("-fx-text-fill: #2e7d32;");
-            gameStatusLabel.setText("¡Correcto! Has completado la palabra secreta.");
+            gameStatusLabel.setText("Correcto. Has completado la palabra secreta.");
             disableAllLetterFields();
             return;
         }
@@ -401,7 +398,7 @@ public class GameController
         }
 
         gameStatusLabel.setStyle("-fx-text-fill: black;");
-        gameStatusLabel.setText("Letras correctas en posición: " + correctLetters + " de " + letterFields.size() + ".");
+        gameStatusLabel.setText("Letras correctas en posicion: " + correctLetters + " de " + letterFields.size() + ".");
     }
 
     /**
@@ -417,12 +414,40 @@ public class GameController
      */
     private void updateEclipseVisualization()
     {
+        int errors = game.getErrors();
         int eclipsePercentage = game.getEclipsePercentage();
-        double eclipseFraction = eclipsePercentage / 100.0;
-        double shadowOffset = MAX_SHADOW_OFFSET * (1.0 - eclipseFraction);
 
-        shadowCircle.setTranslateX(shadowOffset);
+        updateEclipseImage(errors);
         eclipsePercentageLabel.setText("Eclipse del sol: " + eclipsePercentage + "%");
+    }
+
+    /**
+     * Loads the image associated with the current eclipse phase.
+     *
+     * @param phaseNumber current phase number
+     */
+    private void updateEclipseImage(int phaseNumber)
+    {
+        String imagePath = "/com/example/sol_eclipsado_cm_jn/images/FASE " + phaseNumber + ".png";
+
+        try
+        {
+            if (getClass().getResource(imagePath) != null)
+            {
+                Image phaseImage = new Image(getClass().getResource(imagePath).toExternalForm());
+                eclipseImageView.setImage(phaseImage);
+            }
+            else
+            {
+                eclipseImageView.setImage(null);
+                System.err.println("No se encontro la imagen: " + imagePath);
+            }
+        }
+        catch (Exception exception)
+        {
+            eclipseImageView.setImage(null);
+            System.err.println("No se pudo cargar la imagen: " + imagePath);
+        }
     }
 
     /**
