@@ -401,6 +401,33 @@ public class GameController
         gameStatusLabel.setText("Letras correctas en posicion: " + correctLetters + " de " + letterFields.size() + ".");
     }
 
+    @FXML
+    private void onHandleHelpButton()
+    {
+        if (!game.canUseHelp())
+        {
+            gameStatusLabel.setText("Ya usaste las 3 ayudas.");
+            return;
+        }
+
+        List<String> enteredLetters = getEnteredLetters();
+        int index = game.useHelp(enteredLetters);
+
+        if (index == -1)
+        {
+            gameStatusLabel.setText("No hay letras para revelar.");
+            return;
+        }
+
+        String correctLetter = String.valueOf(game.getSecretWord().charAt(index));
+
+        TextField field = letterFields.get(index);
+        field.setText(correctLetter);
+        applyCorrectStyle(field);
+
+        updateProgressStatus();
+    }
+
     /**
      * Updates the label that shows the remaining attempts.
      */

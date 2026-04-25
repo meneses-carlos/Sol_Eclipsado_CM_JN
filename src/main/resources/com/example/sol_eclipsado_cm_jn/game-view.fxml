@@ -7,6 +7,7 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.shape.Circle?>
+<?import javafx.scene.control.Button?>
 
 <VBox xmlns="http://javafx.com/javafx/17"
       xmlns:fx="http://javafx.com/fxml/1"
@@ -59,5 +60,7 @@
                   hgap="8"
                   vgap="8"
                   style="-fx-alignment: center;" />
-    </children>
+        <Button text="Ayuda"
+                onAction="#onHandleHelpButton"
+                style="-fx-font-size: 14px; -fx-font-weight: bold;" />    </children>
 </VBox>

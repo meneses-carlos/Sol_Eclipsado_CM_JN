@@ -244,4 +244,31 @@ public class SolarEclipseGame implements ISolarEclipseGame
             default -> upperLetter;
         };
     }
+
+    public boolean canUseHelp()
+    {
+        return usedHelps < 3;
+    }
+
+    public int useHelp(List<String> currentLetters)
+    {
+        if (!canUseHelp())
+        {
+            return -1;
+        }
+
+        for (int i = 0; i < secretWord.length(); i++)
+        {
+            String expected = String.valueOf(secretWord.charAt(i));
+
+            if (currentLetters.get(i) == null ||
+                    !isLetterCorrectAt(i, currentLetters.get(i)))
+            {
+                usedHelps++;
+                return i;
+            }
+        }
+
+        return -1;
+    }
 }
