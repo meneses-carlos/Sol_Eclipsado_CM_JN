@@ -305,6 +305,12 @@ public class GameController
 
         if (event.getCode() == KeyCode.BACK_SPACE)
         {
+            if (!currentField.isEditable())
+            {
+                event.consume();
+                return;
+            }
+
             if (!currentField.getText().isEmpty())
             {
                 currentField.clear();
@@ -313,8 +319,13 @@ public class GameController
             else if (fieldIndex > 0)
             {
                 TextField previousField = letterFields.get(fieldIndex - 1);
-                previousField.clear();
-                applyNeutralStyle(previousField);
+
+                if (previousField.isEditable())
+                {
+                    previousField.clear();
+                    applyNeutralStyle(previousField);
+                }
+
                 previousField.requestFocus();
             }
 
@@ -356,6 +367,7 @@ public class GameController
         if (game.isLetterCorrectAt(fieldIndex, enteredLetter))
         {
             applyCorrectStyle(currentField);
+            currentField.setEditable(false);
         }
         else
         {
@@ -424,6 +436,7 @@ public class GameController
         TextField field = letterFields.get(index);
         field.setText(correctLetter);
         applyCorrectStyle(field);
+        field.setEditable(false);
 
         updateProgressStatus();
     }
