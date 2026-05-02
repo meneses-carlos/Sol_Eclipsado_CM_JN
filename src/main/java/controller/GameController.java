@@ -431,7 +431,7 @@ public class GameController
             return;
         }
 
-        String correctLetter = String.valueOf(game.getSecretWord().charAt(index));
+        String correctLetter = String.valueOf(game.getSecretWord().charAt(index)).toUpperCase(new Locale("es", "ES"));
 
         TextField field = letterFields.get(index);
         field.setText(correctLetter);
