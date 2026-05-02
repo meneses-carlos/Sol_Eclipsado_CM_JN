@@ -1,5 +1,7 @@
 package com.example.sol_eclipsado_cm_jn.model;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
@@ -257,18 +259,26 @@ public class SolarEclipseGame implements ISolarEclipseGame
             return -1;
         }
 
+        List<Integer> possibleIndexes = new ArrayList<>();
+
         for (int i = 0; i < secretWord.length(); i++)
         {
-            String expected = String.valueOf(secretWord.charAt(i));
+            String current = currentLetters.get(i);
 
-            if (currentLetters.get(i) == null ||
-                    !isLetterCorrectAt(i, currentLetters.get(i)))
+            if (current == null || !isLetterCorrectAt(i, current))
             {
-                usedHelps++;
-                return i;
+                possibleIndexes.add(i);
             }
         }
 
-        return -1;
+        if (possibleIndexes.isEmpty())
+        {
+            return -1;
+        }
+
+        Collections.shuffle(possibleIndexes);
+        usedHelps++;
+
+        return possibleIndexes.get(0);
     }
 }
