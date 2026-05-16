@@ -5,6 +5,8 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 
 <VBox xmlns="http://javafx.com/javafx/17"
       xmlns:fx="http://javafx.com/fxml/1"
@@ -18,8 +20,12 @@
     </padding>
 
     <children>
-        <Label text="Sol Eclipsado"
-               style="-fx-font-size: 24px; -fx-font-weight: bold;" />
+
+        <ImageView fitWidth="450.0" preserveRatio="true">
+            <image>
+                <Image url="@images/fondo.png" />
+            </image>
+        </ImageView>
 
         <Label text="Ingresa la palabra secreta para iniciar el juego."
                wrapText="true"
